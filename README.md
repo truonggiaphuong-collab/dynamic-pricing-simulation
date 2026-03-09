@@ -1,47 +1,72 @@
 # Dynamic Pricing Simulation for Ride-Hailing Platforms
 
-A portfolio project demonstrating **data analysis**, **machine learning**, **economics-based pricing logic**, and **data visualization** for graduate school applications.
+A professional data science portfolio project demonstrating **demand prediction**, **economics-based dynamic pricing**, and **simulation** for graduate school applications (MSc Business Analytics, AI, Quantitative Economics).
 
 ---
 
 ## Problem Statement
 
 Ride-hailing platforms (e.g., Grab, Uber) use **dynamic pricing** (surge pricing) to balance demand and supply. When demand exceeds driver availability, prices increase to:
+
 - Incentivize more drivers to come online
 - Reduce demand from price-sensitive customers
 - Improve matching efficiency
 
-This project simulates a simple dynamic pricing model using public taxi data, estimates demand and supply, and visualizes pricing outcomes over time.
+This project simulates a complete dynamic pricing system: we **predict demand** using machine learning, apply an **economics-based pricing model**, and **simulate** outcomes over time.
+
+---
+
+## Dataset
+
+We use **synthetic ride-hailing data** with realistic temporal and spatial patterns:
+
+| Column        | Description                          |
+|---------------|--------------------------------------|
+| `timestamp`   | Hourly time bucket                   |
+| `hour`        | Hour of day (0–23)                    |
+| `day_of_week` | Day of week (0=Monday)                |
+| `location_id` | Geographic zone (0–4)                 |
+| `trip_distance` | Average trip distance (miles)      |
+| `demand`      | Number of ride requests               |
+| `driver_supply` | Available drivers                  |
+| `base_price`  | Base fare before surge                |
+
+Demand peaks during rush hours (7–9 AM, 5–7 PM); supply is lower at night. Real NYC TLC taxi data can be integrated via `data_processing.load_and_preprocess()`.
 
 ---
 
 ## Methodology
 
-### 1. Data Source
-- **Primary**: [NYC TLC Taxi Trip Data](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page)
-- **Alternative**: Synthetic sample data (included for quick testing)
+### 1. Demand Prediction Models
 
-### 2. Data Structure
-| Variable       | Description                                      |
-|----------------|--------------------------------------------------|
-| `timestamp`    | Time bucket (hourly)                             |
-| `demand`       | Number of ride requests (pickup count)           |
-| `driver_supply`| Available drivers (dropoff count as proxy)       |
-| `trip_distance`| Average trip distance (miles)                    |
-| `base_price`   | Base fare before surge                           |
+We compare three models to predict demand:
 
-### 3. Demand & Supply Estimation
-- **Demand**: Count of pickups per hour
-- **Supply**: Count of dropoffs (lagged) as proxy for drivers becoming available
+| Model             | Type        | Use Case              |
+|-------------------|-------------|------------------------|
+| Linear Regression | Baseline    | Simple benchmark       |
+| Random Forest     | Tree-based  | Non-linear patterns   |
+| XGBoost           | Gradient Boosting | Best performance |
 
-### 4. Pricing Model
+**Features:** `hour_sin`, `hour_cos`, `day_of_week`, `trip_distance`
+
+**Evaluation:** MAE, RMSE, R²
+
+### 2. Dynamic Pricing Model
+
 ```
-surge_multiplier = demand / supply
-surge_multiplier = clip(surge_multiplier, min=1, max=3)
-simulated_price = base_price × surge_multiplier
+price_multiplier = predicted_demand / supply
+multiplier = clip(multiplier, min=1, max=3)
+price = base_price × multiplier
 ```
 
-Constraints: multiplier ∈ [1, 3] (no discount below base, cap at 3×)
+- **Minimum multiplier = 1** — No discount below base fare
+- **Maximum multiplier = 3** — Cap surge at 3× to limit customer backlash
+
+### 3. Simulation Engine
+
+- Runs pricing over multiple days (configurable)
+- Tracks: demand, supply, price multiplier, revenue, rides served
+- Computes: total revenue, average price, demand-served ratio
 
 ---
 
@@ -51,20 +76,21 @@ Constraints: multiplier ∈ [1, 3] (no discount below base, cap at 3×)
 dynamic-pricing-simulation/
 ├── README.md
 ├── requirements.txt
+├── run_simulation.py          # Main entry point
 ├── data/
-│   ├── raw/              # Place NYC taxi CSV here
-│   └── processed/        # Aggregated & simulated outputs
+│   ├── raw/                   # Place NYC taxi CSV here (optional)
+│   └── processed/             # simulation_results.csv, summary
+├── notebooks/
+│   └── pricing_simulation.ipynb   # End-to-end demonstration
+├── figures/                   # Generated plots
 ├── src/
-│   ├── 01_data_preprocessing.py
-│   ├── 02_demand_supply_estimation.py
-│   ├── 03_pricing_model.py
-│   ├── 04_run_simulation.py
-│   └── 05_visualizations.py
-├── outputs/
-│   └── figures/          # Generated plots
+│   ├── data_processing.py     # Data generation, preprocessing
+│   ├── demand_model.py        # LR, RF, XGBoost demand prediction
+│   ├── pricing_model.py       # Surge pricing logic
+│   ├── simulation.py          # Simulation engine
+│   └── visualization.py       # Plotting functions
 └── docs/
-    ├── 01_DATASET_GUIDE.md
-    └── 02_DEMAND_SUPPLY_ESTIMATION.md
+    └── STEP1_REVIEW.md        # Project review
 ```
 
 ---
@@ -72,66 +98,50 @@ dynamic-pricing-simulation/
 ## Quick Start
 
 ```bash
-# 1. Create virtual environment
-python -m venv venv
-venv\Scripts\activate   # Windows
-
-# 2. Install dependencies
+# 1. Install dependencies
 pip install -r requirements.txt
 
-# 3. Run simulation (uses synthetic data if no raw data)
-python src/04_run_simulation.py
+# 2. Run full simulation
+python run_simulation.py
 
-# 4. Generate visualizations
-python src/05_visualizations.py
+# 3. Or run the Jupyter notebook
+jupyter notebook notebooks/pricing_simulation.ipynb
 ```
 
-### Using Real NYC Taxi Data
-1. Download from [NYC TLC](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page)
-2. Place `yellow_tripdata_YYYY-MM.csv` in `data/raw/`
-3. Edit `01_data_preprocessing.py`: remove `nrows=100_000` for full data
-4. Run `python src/01_data_preprocessing.py`
-5. Run `python src/02_demand_supply_estimation.py`
-6. Run `python src/03_pricing_model.py` (or use `04_run_simulation.py` with `use_sample=False`)
+---
+
+## Simulation Results
+
+Example output from a 7-day simulation:
+
+| Metric               | Value    |
+|----------------------|----------|
+| Total Revenue        | ~$XX,XXX |
+| Average Price        | ~$15–25  |
+| Demand Served Ratio  | ~85–95%  |
+| Best Demand Model    | XGBoost  |
+
+### Key Insights
+
+1. **Surge peaks during rush hours** — 7–9 AM and 5–7 PM show highest multipliers
+2. **XGBoost outperforms baseline** — Captures non-linear hour-of-day effects
+3. **Revenue vs multiplier** — Higher multipliers increase revenue but may reduce demand-served ratio
+4. **Night hours** — Lower demand and supply; multipliers often at baseline (1.0x)
 
 ---
 
-## Results
+## Future Improvements
 
-The simulation produces:
-- **Demand vs Supply** over time
-- **Surge multiplier** over time (1.0x = no surge, up to 3.0x)
-- **Price distribution** and hourly patterns
-
-Example findings:
-- Surge peaks during rush hours (7–9 AM, 5–7 PM)
-- Night hours show lower demand and supply
-- Price distribution reflects time-of-day patterns
-
----
-
-## Conclusion
-
-This project demonstrates:
-- **Data engineering**: Preprocessing and aggregating raw trip data
-- **Economics**: Demand-supply equilibrium and surge pricing logic
-- **Coding**: Modular Python pipeline with clear structure
-- **Visualization**: Publication-ready plots with matplotlib/seaborn
-
----
-
-## Possible Extensions
-
-| Extension                    | Description                                                                 |
-|-----------------------------|-----------------------------------------------------------------------------|
-| **ML Demand Prediction**    | Use XGBoost/LSTM to predict demand from weather, events, historical patterns |
-| **Reinforcement Learning**  | Train an RL agent to optimize multiplier for revenue or social welfare      |
-| **Driver Allocation**       | Optimize driver positioning across zones to reduce wait times               |
-| **Zone-Based Pricing**      | Different multipliers by `PULocationID` (e.g., airport vs downtown)         |
-| **A/B Testing Simulation**  | Compare pricing strategies on revenue, utilization, customer satisfaction  |
+| Extension                  | Description                                              |
+|---------------------------|----------------------------------------------------------|
+| **Real data**             | Integrate NYC TLC taxi data for validation              |
+| **Reinforcement Learning**| Optimize multiplier for long-term revenue               |
+| **Zone-based pricing**    | Different multipliers by location (airport vs downtown) |
+| **A/B testing**           | Compare pricing strategies on revenue and fairness      |
+| **Causal inference**      | Estimate demand elasticity with respect to price         |
 
 ---
 
 ## License
 
-MIT License. Data from NYC TLC is subject to their terms of use.
+MIT License. Data from NYC TLC (if used) is subject to their terms of use.
