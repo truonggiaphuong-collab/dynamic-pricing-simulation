@@ -1,12 +1,10 @@
-# Dynamic Pricing Simulation for Ride-Hailing Platforms
-
-A professional data science portfolio project demonstrating **demand prediction**, **economics-based dynamic pricing**, and **simulation** for graduate school applications (MSc Business Analytics, AI, Quantitative Economics).
+# Dynamic pricing simulation for ride-hailing platforms
 
 ---
 
 ## Problem Statement
 
-Ride-hailing platforms (e.g., Grab, Uber) use **dynamic pricing** (surge pricing) to balance demand and supply. When demand exceeds driver availability, prices increase to:
+Ride-hailing platforms (Deliveroo, Uber) use **dynamic pricing** (surge pricing) to balance demand and supply. When demand exceeds driver availability, prices increase to:
 
 - Incentivize more drivers to come online
 - Reduce demand from price-sensitive customers
@@ -18,7 +16,7 @@ This project simulates a complete dynamic pricing system: we **predict demand** 
 
 ## Dataset
 
-We use **synthetic ride-hailing data** with realistic temporal and spatial patterns:
+We use TLC Trip Record Data with realistic temporal and spatial patterns:
 
 | Column        | Description                          |
 |---------------|--------------------------------------|
@@ -76,10 +74,10 @@ price = base_price × multiplier
 dynamic-pricing-simulation/
 ├── README.md
 ├── requirements.txt
-├── run_simulation.py          # Main entry point
+├── run_simulation.py          
 ├── data/
-│   ├── raw/                   # Place NYC taxi CSV here (optional)
-│   └── processed/             # simulation_results.csv, summary
+│   ├── raw/                   
+│   └── processed/            
 ├── notebooks/
 │   └── pricing_simulation.ipynb   # End-to-end demonstration
 ├── figures/                   # Generated plots
@@ -144,4 +142,4 @@ Example output from a 7-day simulation:
 
 ## License
 
-MIT License. Data from NYC TLC (if used) is subject to their terms of use.
+MIT License. Data from NYC TLC is subject to their terms of use.
