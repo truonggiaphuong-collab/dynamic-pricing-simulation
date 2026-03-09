@@ -74,12 +74,30 @@ def plot_price_distribution(df: pd.DataFrame, save_path: Path = None) -> None:
 
 
 def plot_revenue_vs_multiplier(df: pd.DataFrame, save_path: Path = None) -> None:
-    """Plot revenue vs price multiplier (scatter or binned)."""
+    """Plot revenue vs price multiplier (scatter)."""
     fig, ax = plt.subplots(figsize=(8, 5))
     ax.scatter(df["surge_multiplier"], df["revenue"], alpha=0.5, s=20)
     ax.set_xlabel("Surge Multiplier")
     ax.set_ylabel("Revenue ($)")
     ax.set_title("Revenue vs Surge Multiplier")
+    plt.tight_layout()
+    if save_path:
+        plt.savefig(save_path, dpi=150, bbox_inches="tight")
+    plt.close()
+
+
+def plot_counterfactual(df: pd.DataFrame, save_path: Path = None) -> None:
+    """Plot surge vs no-surge revenue over time (counterfactual)."""
+    if "revenue_no_surge" not in df.columns:
+        return
+    fig, ax = plt.subplots(figsize=(12, 5))
+    ax.plot(df["timestamp"], df["revenue"], label="With Surge", alpha=0.8)
+    ax.plot(df["timestamp"], df["revenue_no_surge"], label="No Surge", alpha=0.8)
+    ax.set_xlabel("Time")
+    ax.set_ylabel("Revenue ($)")
+    ax.set_title("Counterfactual: Surge vs No-Surge Revenue")
+    ax.legend()
+    ax.tick_params(axis="x", rotation=45)
     plt.tight_layout()
     if save_path:
         plt.savefig(save_path, dpi=150, bbox_inches="tight")
@@ -122,4 +140,5 @@ def generate_all_plots(df: pd.DataFrame, output_dir: Path) -> None:
     plot_surge_multiplier(df, save_path=output_dir / "surge_multiplier.png")
     plot_price_distribution(df, save_path=output_dir / "price_distribution.png")
     plot_revenue_vs_multiplier(df, save_path=output_dir / "revenue_vs_multiplier.png")
+    plot_counterfactual(df, save_path=output_dir / "counterfactual_surge_vs_no_surge.png")
     plot_hourly_patterns(df, save_path=output_dir / "hourly_patterns.png")

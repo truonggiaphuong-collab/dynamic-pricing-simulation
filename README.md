@@ -1,4 +1,6 @@
-# Dynamic pricing simulation for ride-hailing platforms
+# Dynamic Pricing Simulation for Ride-Hailing Platforms
+
+A professional data science portfolio project demonstrating **demand prediction**, **economics-based dynamic pricing**, and **simulation** for graduate school applications (MSc Business Analytics, AI, Quantitative Economics).
 
 ---
 
@@ -16,7 +18,7 @@ This project simulates a complete dynamic pricing system: we **predict demand** 
 
 ## Dataset
 
-We use TLC Trip Record Data with realistic temporal and spatial patterns:
+We use **NYC TLC Yellow Taxi data** when available (auto-download from official source), with **synthetic data** as fallback:
 
 | Column        | Description                          |
 |---------------|--------------------------------------|
@@ -29,7 +31,7 @@ We use TLC Trip Record Data with realistic temporal and spatial patterns:
 | `driver_supply` | Available drivers                  |
 | `base_price`  | Base fare before surge                |
 
-Demand peaks during rush hours (7–9 AM, 5–7 PM); supply is lower at night. Real NYC TLC taxi data can be integrated via `data_processing.load_and_preprocess()`.
+Demand peaks during rush hours (7–9 AM, 5–7 PM); supply is lower at night. The pipeline attempts to download NYC TLC data automatically; if unavailable, uses synthetic data.
 
 ---
 
@@ -63,8 +65,9 @@ price = base_price × multiplier
 ### 3. Simulation Engine
 
 - Runs pricing over multiple days (configurable)
+- **Train/test split** — Time-based validation for out-of-sample model evaluation
+- **Counterfactual analysis** — Compares surge pricing vs. no-surge baseline (revenue lift)
 - Tracks: demand, supply, price multiplier, revenue, rides served
-- Computes: total revenue, average price, demand-served ratio
 
 ---
 
@@ -112,18 +115,28 @@ jupyter notebook notebooks/pricing_simulation.ipynb
 
 Example output from a 7-day simulation:
 
-| Metric               | Value    |
-|----------------------|----------|
-| Total Revenue        | ~$XX,XXX |
-| Average Price        | ~$15–25  |
-| Demand Served Ratio  | ~85–95%  |
-| Best Demand Model    | XGBoost  |
+| Metric               | Value       |
+|----------------------|-------------|
+| Total Revenue        | $454,381    |
+| Revenue (No Surge)   | $326,976    |
+| **Revenue Lift**     | **+39.0%**  |
+| Average Price        | $16.95      |
+| Demand Served Ratio  | 71.25%      |
+| Best Demand Model    | Random Forest |
+
+### Model Performance (Out-of-Sample Test Set)
+
+| Model             | MAE   | RMSE  | R²    |
+|-------------------|-------|-------|-------|
+| Linear Regression | 112.7 | 138.2 | 0.12  |
+| Random Forest     | 14.2  | 18.1  | 0.99  |
+| XGBoost           | 18.1  | 24.1  | 0.97  |
 
 ### Key Insights
 
-1. **Surge peaks during rush hours** — 7–9 AM and 5–7 PM show highest multipliers
-2. **XGBoost outperforms baseline** — Captures non-linear hour-of-day effects
-3. **Revenue vs multiplier** — Higher multipliers increase revenue but may reduce demand-served ratio
+1. **Surge pricing increases revenue by ~39%** — Counterfactual comparison vs. no-surge baseline
+2. **Surge peaks during rush hours** — 7–9 AM and 5–7 PM show highest multipliers
+3. **Proper validation matters** — Train/test split prevents overfitting; Random Forest generalizes best
 4. **Night hours** — Lower demand and supply; multipliers often at baseline (1.0x)
 
 ---

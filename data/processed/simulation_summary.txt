@@ -1,0 +1,18 @@
+total_revenue: 454380.62111572805
+total_revenue_no_surge: 326975.90599999996
+revenue_lift_pct: 38.96455756459563
+avg_price: 16.94781634991825
+avg_multiplier: 1.2586027205624861
+total_demand: 33991
+total_rides_served: 24219
+demand_served_ratio: 0.7125121355652967
+best_demand_model: Random Forest
+data_source: synthetic
+model_metrics_train:
+  Linear Regression: MAE=117.20, RMSE=141.35, R2=0.133
+  Random Forest: MAE=6.58, RMSE=9.96, R2=0.996
+  XGBoost: MAE=1.42, RMSE=2.09, R2=1.000
+model_metrics_test:
+  Linear Regression: MAE=112.74, RMSE=138.20, R2=0.123
+  Random Forest: MAE=14.17, RMSE=18.06, R2=0.985
+  XGBoost: MAE=18.05, RMSE=24.08, R2=0.973
